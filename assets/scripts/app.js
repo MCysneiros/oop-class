@@ -35,7 +35,6 @@ const productList = {
       const prodEl = document.createElement('li');
       prodEl.className = 'product-item';
       prodEl.innerHTML = `
-
       <div>
       <img src="${prod.imageUrl}" alt="${prod.title}">
       <div class="product-item__content">
@@ -43,7 +42,6 @@ const productList = {
       <h3>\$${prod.price}</h3>
       <p>${prod.description}</p>
       <button>ADD TO CART</button>
-      
       </div>
       </div
       `;
