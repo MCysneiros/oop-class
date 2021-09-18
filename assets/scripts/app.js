@@ -3,25 +3,29 @@ class Product {
   imageUrl;
   description;
   price;
+  constructor(title, image, desc, price) {
+    this.title = title;
+    this.imageUrl = image;
+    this.description = desc;
+    this.price = price;
+  }
 }
 
 const productList = {
   product: [
-    // new Product()
-    {
-      title: 'A pillow',
-      imageUrl:
-        'https://images-americanas.b2w.io/produtos/01/00/img/1299410/4/1299410484_1GG.jpg',
-      price: 19.99,
-      description: 'A soft pillow',
-    },
-    {
-      title: 'A Carpet',
-      imageUrl:
-        'https://tapetesnaweb.vteximg.com.br/arquivos/ids/173368-600-600/Tapete-Belga-Geometrico-Des--01-067X105m---Edx-Tapetes1.jpg?v=637261894931370000',
-      price: 89.99,
-      description: 'A modern carpet',
-    },
+    new Product(
+      'A pillow',
+      'https://images-americanas.b2w.io/produtos/01/00/img/1299410/4/1299410484_1GG.jpg',
+      'A soft pillow',
+      19.99
+    ),
+
+    new Product(
+      'A carpet',
+      'https://tapetesnaweb.vteximg.com.br/arquivos/ids/173368-600-600/Tapete-Belga-Geometrico-Des--01-067X105m---Edx-Tapetes1.jpg?v=637261894931370000',
+      'A modern carpet',
+      89.99
+    ),
   ],
   render() {
     const renderHook = document.getElementById('app');
