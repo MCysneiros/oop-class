@@ -10,8 +10,38 @@ class Product {
     this.price = price;
   }
 }
+class ElementAttribute {
+  constructor(attName, attValue) {
+    this.name = attName;
+    this.value = attValue;
+  }
+}
 
-class ShoppingCart {
+class Component {
+  constructor(renderHookId, shouldRender = true) {
+    this.hookId = renderHookId;
+    if (shouldRender) {
+      this.render();
+    }
+  }
+  render() {}
+
+  createRootElement(tag, cssClasses, attributes) {
+    const rootElement = document.createElement(tag);
+    if (cssClasses) {
+      rootElement.className = cssClasses;
+    }
+
+    if (attributes && attributes.length) {
+      for (const att of attributes) {
+        rootElement.setAttribute(att.name, att.value);
+      }
+    }
+    document.getElementById(this.hookId).append(rootElement);
+    return rootElement;
+  }
+}
+class ShoppingCart extends Component {
   items = [];
 
   set cartItems(value) {
@@ -28,34 +58,47 @@ class ShoppingCart {
     );
     return sum;
   }
+
+  constructor(renderHookId) {
+    super(renderHookId);
+  }
   addProduct(product) {
     const updatedItems = [...this.items];
     updatedItems.push(product);
     this.cartItems = updatedItems;
   }
 
+  orderProduct() {
+    console.log('Ordering.......');
+    console.log(this.items);
+  }
+
   render() {
-    const cartEl = document.createElement('section');
+    const cartEl = this.createRootElement('section', 'cart');
     cartEl.innerHTML = `
     <h2> Total:\$${0}</h2>
-    <button>ORDER NOW</button>`;
-    cartEl.className = 'cart';
+    <button>ORDER NOW</button>
+    `;
+    const orderBtn = cartEl.querySelector('button');
+    orderBtn.addEventListener('click', () => this.orderProduct());
     this.totalOutput = cartEl.querySelector('h2');
     return cartEl;
   }
 }
 
-class ProductItem {
-  constructor(product) {
+class ProductItem extends Component {
+  constructor(product, renderHookId) {
+    super(renderHookId, false);
     this.product = product;
+    this.render();
   }
+
   addToCart() {
     App.addProductToCart(this.product);
   }
 
   render() {
-    const prodEl = document.createElement('li');
-    prodEl.className = 'product-item';
+    const prodEl = this.createRootElement('li', 'product-item');
     prodEl.innerHTML = `
       <div>
       <img src="${this.product.imageUrl}" alt="${this.product.title}">
@@ -69,51 +112,58 @@ class ProductItem {
       `;
     const addCartBtn = prodEl.querySelector('button');
     addCartBtn.addEventListener('click', this.addToCart.bind(this));
-
-    return prodEl;
   }
 }
 
-class ProductList {
-  products = [
-    new Product(
-      'A pillow',
-      'https://images-americanas.b2w.io/produtos/01/00/img/1299410/4/1299410484_1GG.jpg',
-      'A soft pillow',
-      19.99
-    ),
+class ProductList extends Component {
+  #products = [];
+  constructor(renderHookId) {
+    super(renderHookId, false);
+    this.render();
+    this.fetchProducts();
+  }
+  fetchProducts() {
+    this.#products = [
+      new Product(
+        'A pillow',
+        'https://images-americanas.b2w.io/produtos/01/00/img/1299410/4/1299410484_1GG.jpg',
+        'A soft pillow',
+        19.99
+      ),
 
-    new Product(
-      'A carpet',
-      'https://tapetesnaweb.vteximg.com.br/arquivos/ids/173368-600-600/Tapete-Belga-Geometrico-Des--01-067X105m---Edx-Tapetes1.jpg?v=637261894931370000',
-      'A modern carpet',
-      89.99
-    ),
-  ];
-  constructor() {}
-  render() {
-    const prodList = document.createElement('ul');
-    prodList.className = 'product-list';
-    for (const prod of this.products) {
-      const productItem = new ProductItem(prod);
-      const prodEl = productItem.render();
-      prodList.append(prodEl);
+      new Product(
+        'A carpet',
+        'https://tapetesnaweb.vteximg.com.br/arquivos/ids/173368-600-600/Tapete-Belga-Geometrico-Des--01-067X105m---Edx-Tapetes1.jpg?v=637261894931370000',
+        'A modern carpet',
+        89.99
+      ),
+    ];
+    this.renderProducts();
+  }
+
+  renderProducts() {
+    for (const prod of this.#products) {
+      const productItem = new ProductItem(prod, 'prod-list');
     }
-    return prodList;
+  }
+
+  render() {
+    const prodList = this.createRootElement('ul', 'product-list', [
+      new ElementAttribute('id', 'prod-list'),
+    ]);
+    if (this.#products && this.#products.length > 0) {
+      this.renderProducts();
+    }
   }
 }
 
-class Shop {
+class Shop extends Component {
+  constructor() {
+    super();
+  }
   render() {
-    const renderHook = document.getElementById('app');
-
-    this.cart = new ShoppingCart();
-    const cartEl = this.cart.render();
-    const productList = new ProductList();
-    const prodListEl = productList.render();
-
-    renderHook.appendChild(cartEl);
-    renderHook.appendChild(prodListEl);
+    this.cart = new ShoppingCart('app');
+    new ProductList('app');
   }
 }
 class App {
@@ -121,7 +171,6 @@ class App {
 
   static init() {
     const shop = new Shop();
-    shop.render();
     this.cart = shop.cart;
   }
 
